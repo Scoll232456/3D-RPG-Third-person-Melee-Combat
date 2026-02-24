@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// 使用球形碰撞来检测敌人的视野范围
 public class VisionSensor : MonoBehaviour
 {
     public EnemyController enemy;

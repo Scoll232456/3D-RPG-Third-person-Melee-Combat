@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // 控制不同类型单位的状态，T 为单位控制器
+// 每种不同的单位实现多态
 public class State<T> : MonoBehaviour
 {
     public virtual void Enter(T owner)

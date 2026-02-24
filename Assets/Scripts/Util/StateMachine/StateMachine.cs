@@ -5,6 +5,7 @@ using UnityEngine;
 // 单位状态转换器
 public class StateMachine<T>
 {
+    // 某个单位当前的状态
     public State<T> CurrentState { get; private set; }
 
     T _owner;
