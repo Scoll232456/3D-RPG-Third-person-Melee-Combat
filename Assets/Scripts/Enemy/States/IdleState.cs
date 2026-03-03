@@ -9,7 +9,7 @@ public class IdleState : State<EnemyController>
     public override void Enter(EnemyController owner)
     {
         enemy = owner;
-        
+        enemy.animator.SetBool("CombatMode",false);
     }
     public override void Execute()
     {
@@ -23,7 +23,6 @@ public class IdleState : State<EnemyController>
                 enemy.ChangeState(EnemyState.CombatMovement);
                 break;
             }
-
         }
     }
     public override void Exit()

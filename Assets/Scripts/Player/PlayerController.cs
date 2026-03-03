@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -24,21 +25,30 @@ public class PlayerController : MonoBehaviour
     bool isGround;
     float SpeedY;
 
+    public Vector3 InputDir{ private set; get; }
+
     [Header("Fight")]
     MeeleFighter meeleFighter;
 
+    CombatController combatController;
+
+    public static PlayerController i { private set; get; }
     private void Start()
     {
         _CameraController = Camera.main.GetComponent<CameraController>();
         _Animator = GetComponent<Animator>();
         _CharacterController = GetComponent<CharacterController>();
         meeleFighter = GetComponent<MeeleFighter>();
+        combatController = GetComponent<CombatController>();
+
+        i = this;
 
     }
     void Update()
     {
         if (meeleFighter.InAction) 
         {
+            TargetRotation = transform.rotation;
             _Animator.SetFloat("ForwardSpeed", 0);
             return; 
         }
@@ -55,6 +65,8 @@ public class PlayerController : MonoBehaviour
         // 按键且转动摄像机之后，主角的最终移动方向 只能绕Y轴转动
         var MainRoleMoveDir = _CameraController.PlanerRotation * MoveDir_hv;
 
+        InputDir = MainRoleMoveDir;
+
         // 主角是否碰到地面的检测
         GroundCheck();
 
@@ -69,22 +81,49 @@ public class PlayerController : MonoBehaviour
 
         // 主角的速度(包含了大小和方向)
         var MainRoleVelocity = MainRoleMoveDir * MoveSpeed;
+        
+        if (combatController.CombatMode)
+        {
+            MainRoleVelocity /= 4;
+
+            // 玩家处于战斗状态时，面朝敌人
+            var targetVec = combatController.TargetEnemy.transform.position - transform.position;
+            targetVec.y = 0f;
+            if(MoveAmount > 0)
+            {
+                TargetRotation = Quaternion.LookRotation(targetVec);
+
+                transform.rotation = Quaternion.RotateTowards(transform.rotation,
+                TargetRotation, RotationSpeed * Time.deltaTime);
+            }
+
+            float ForwardSpeed = Vector3.Dot(MainRoleVelocity, transform.forward);
+
+            _Animator.SetFloat("ForwardSpeed", ForwardSpeed / MoveSpeed, 0.2f, Time.deltaTime);
+
+            float angle = Vector3.SignedAngle(transform.forward, MainRoleVelocity, Vector3.up);
+            float StrafeSpeed = Mathf.Sin(angle * Mathf.Deg2Rad);
+            _Animator.SetFloat("StrafeSpeed", StrafeSpeed, 0.2f, Time.deltaTime);
+        }
+        else 
+        {
+            // 使得主角的正面与其移动地最终方向保持一致
+            if (MoveAmount > 0)
+            {
+                // transform.position += MainRoleMoveDir * MoveSpeed * Time.deltaTime;
+                TargetRotation = Quaternion.LookRotation(MainRoleMoveDir);
+            }
+            transform.rotation = Quaternion.RotateTowards(transform.rotation,
+                TargetRotation, RotationSpeed * Time.deltaTime);
+
+            // 添加移动的动画效果，不再仅仅是模型的平移
+            _Animator.SetFloat("ForwardSpeed", MoveAmount, 0.1f, Time.deltaTime);
+        }
+
         MainRoleVelocity.y = SpeedY;
 
         // 主角的模型朝最终方向移动
         _CharacterController.Move(MainRoleVelocity * Time.deltaTime);
-
-        // 使得主角的正面与其移动地最终方向保持一致
-        if ( MoveAmount > 0 ) 
-        {
-            // transform.position += MainRoleMoveDir * MoveSpeed * Time.deltaTime;
-            TargetRotation = Quaternion.LookRotation(MainRoleMoveDir);
-        }
-        transform.rotation = Quaternion.RotateTowards(transform.rotation,
-            TargetRotation, RotationSpeed * Time.deltaTime);
-
-        // 添加移动的动画效果，不再仅仅是模型的平移
-        _Animator.SetFloat("ForwardSpeed", MoveAmount,0.1f,Time.deltaTime);
     }
     void GroundCheck()
     {

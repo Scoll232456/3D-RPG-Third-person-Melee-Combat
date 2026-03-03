@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
+// 近战单位每段攻击都有的节点
 public enum MeeleFighterAttackState
 {
     Idle,
@@ -20,6 +22,9 @@ public class MeeleFighter : MonoBehaviour
 
     Animator animator;
     public MeeleFighterAttackState AttackState { get; private set; }
+    public bool InCounter { set; get; } = false;
+
+    public float rotationSpeed = 500f;
 
     // 连招，是否触发连招，连招数量
     private bool DoCombo;
@@ -46,11 +51,11 @@ public class MeeleFighter : MonoBehaviour
         }
     }
 
-    public void TryToAttack()
+    public void TryToAttack(Vector3? attackDir = null)
     {
         if (!InAction)
         {
-            StartCoroutine(Attack());
+            StartCoroutine(Attack(attackDir));
         }
         else if (AttackState == MeeleFighterAttackState.Impact || AttackState == MeeleFighterAttackState.CoolDown)
         {
@@ -58,7 +63,7 @@ public class MeeleFighter : MonoBehaviour
         }
     }
 
-    IEnumerator Attack()
+    IEnumerator Attack(Vector3? attackDir = null)
     {
         InAction = true; // 避免反复触发攻击动作
 
@@ -76,8 +81,16 @@ public class MeeleFighter : MonoBehaviour
         {
             timer += Time.deltaTime;
             float AnimationProgressRatio = timer / AnimatorState.length;
+
+            if (attackDir != null) 
+            {
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(attackDir.Value),
+                    rotationSpeed * Time.deltaTime); 
+            }
+
             if (AttackState == MeeleFighterAttackState.WindUp)
             {
+                if (InCounter) { break; }
                 if (AnimationProgressRatio > attacks[ComboCount].ImpactStartTime)
                 {
                     AttackState = MeeleFighterAttackState.Impact; // 进入碰撞状态
@@ -113,9 +126,14 @@ public class MeeleFighter : MonoBehaviour
 
         InAction = false;
     }
-    IEnumerator PlayerHitReaction()
+    IEnumerator PlayerHitReaction(Transform attacker)
     {
         InAction = true;
+
+        // 受到攻击的方向
+        var Vect = attacker.transform.position - transform.position;
+        Vect.y = 0;
+
         animator.CrossFadeInFixedTime("AttackImpact", 0.2f);
         yield return null;
 
@@ -126,11 +144,48 @@ public class MeeleFighter : MonoBehaviour
         InAction = false;
     }
 
+    public IEnumerator PreformCombatAttack(EnemyController opponent)
+    {
+        InAction = true;
+
+        InCounter = true;
+        opponent.Fighter.InCounter = true;
+        opponent.ChangeState(EnemyState.Dead);
+
+        var disVector = opponent.transform.position - transform.position;
+        disVector.y = 0f;
+        transform.rotation = Quaternion.LookRotation(disVector);
+        opponent.transform.rotation = Quaternion.LookRotation(-disVector);
+
+        var targetPos = opponent.transform.position - disVector.normalized * 1f;
+
+        animator.CrossFade("CounterAttack", 0.2f);
+        opponent.animator.CrossFade("CounterAttackVictim", 0.2f);
+        yield return null;
+
+        var AnimatorState = animator.GetNextAnimatorStateInfo(1);
+
+        float timer = 0f;
+        while (timer <= AnimatorState.length)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, targetPos, 5 * Time.deltaTime);
+
+            yield return null;
+
+            timer += Time.deltaTime;
+        }
+
+        InCounter = false;
+        opponent.Fighter.InCounter = false;
+
+        InAction = false;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.tag == "HitBox" && !InAction )// && this.tag == "Enemy"
         {
-            StartCoroutine(PlayerHitReaction());
+            StartCoroutine( PlayerHitReaction(other.GetComponentInParent<MeeleFighter>().transform) );
         }
     }
 
@@ -184,5 +239,5 @@ public class MeeleFighter : MonoBehaviour
     }
 
     public List<AttackData> Attacks => attacks;
-
+    public bool IsCounterable => AttackState == MeeleFighterAttackState.WindUp && ComboCount == 0;
 }

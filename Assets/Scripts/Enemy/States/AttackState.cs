@@ -15,13 +15,13 @@ public class AttackState : State<EnemyController>
     {
         enemy = owner;
 
-        enemy.navMeshAgent.stoppingDistance = attackDistance;
+        enemy.NavMeshAgent.stoppingDistance = attackDistance;
     }
     public override void Execute()
     {
         if (isAttacking || enemy.Target == null) { return; }
 
-        enemy.navMeshAgent.SetDestination(enemy.Target.transform.position);
+        enemy.NavMeshAgent.SetDestination(enemy.Target.transform.position);
 
         if (Vector3.Distance(enemy.Target.transform.position, 
             enemy.transform.position) <= attackDistance + 0.03f) 
@@ -31,7 +31,7 @@ public class AttackState : State<EnemyController>
     }
     public override void Exit()
     {
-        enemy.navMeshAgent.ResetPath();
+        enemy.NavMeshAgent.ResetPath();
     }
 
     IEnumerator Attack(int comboCount = 1)
@@ -52,6 +52,9 @@ public class AttackState : State<EnemyController>
         enemy.animator.applyRootMotion = false;
         isAttacking = false;
 
-        enemy.ChangeState(EnemyState.RetreatAfterAttack);
+        if (enemy.IsInState(EnemyState.Attack)) 
+        {
+            enemy.ChangeState(EnemyState.RetreatAfterAttack);
+        }
     }
 }

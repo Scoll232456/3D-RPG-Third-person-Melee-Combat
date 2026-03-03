@@ -5,10 +5,11 @@ using UnityEngine;
 
 public class TestScript : MonoBehaviour
 {
+   [SerializeField]public string abc { get; set; }
     private string name = "LLLMMM";
     public string Name { get { return name; } set { name = value; } }
 
-    [field: SerializeField] public string _Name { get; set; }
+    [field: SerializeField] public string _Name { get; private set; }
     private void Start()
     {
         var p = new TestTwo();

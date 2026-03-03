@@ -7,6 +7,11 @@ public class VisionSensor : MonoBehaviour
 {
     public EnemyController enemy;
 
+    private void Awake()
+    {
+        enemy.Visioner = this;
+    }
+
     // 将进入范围的目标添加，离开范围的目标移除
     private void OnTriggerEnter(Collider other)
     {
@@ -14,16 +19,17 @@ public class VisionSensor : MonoBehaviour
         if(fighter != null)
         {
             enemy.TargetsInRange.Add(fighter);
-            EmenyManager.i.AddEnemyInRange(enemy);
+            EnemyManager.i.AddEnemyInRange(enemy);
         }
     }
+
     private void OnTriggerExit(Collider other)
     {
         var fighter = other.GetComponent<MeeleFighter>();
         if (fighter != null)
         {
             enemy.TargetsInRange.Remove(fighter);
-            EmenyManager.i.RemoveEnemyInRange(enemy);
+            EnemyManager.i.RemoveEnemyInRange(enemy);
         }
     }
 }

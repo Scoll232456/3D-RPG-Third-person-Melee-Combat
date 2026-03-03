@@ -5,7 +5,7 @@ using UnityEngine;
 public class RetreatAfterAttackState : State<EnemyController>
 {
     public float backwardWalkSpeed = 1.5f;
-    public float distanceToRetreat = 3f;
+    public float distanceToRetreat = 4f;
 
     EnemyController enemy;
     public override void Enter(EnemyController owner)
@@ -22,7 +22,7 @@ public class RetreatAfterAttackState : State<EnemyController>
         }
 
         var vecToTarget = enemy.Target.transform.position - enemy.transform.position;
-        enemy.navMeshAgent.Move(-vecToTarget.normalized * backwardWalkSpeed * Time.deltaTime);
+        enemy.NavMeshAgent.Move(-vecToTarget.normalized * backwardWalkSpeed * Time.deltaTime);
 
         vecToTarget.y = 0f;
         transform.rotation = Quaternion.RotateTowards(transform.rotation,

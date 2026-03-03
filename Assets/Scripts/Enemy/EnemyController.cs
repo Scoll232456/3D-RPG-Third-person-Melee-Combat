@@ -8,7 +8,8 @@ public enum EnemyState
     Idle,
     CombatMovement,
     Attack,
-    RetreatAfterAttack
+    RetreatAfterAttack,
+    Dead
 }
 
 public class EnemyController : MonoBehaviour
@@ -23,23 +24,29 @@ public class EnemyController : MonoBehaviour
     public float CombatMovementTimer { get; set; } = 0f;
 
    
-    Dictionary<EnemyState, State<EnemyController>> stateDict;
+    public Dictionary<EnemyState, State<EnemyController>> stateDict { get;private set; }
 
-     public NavMeshAgent navMeshAgent { get; private set; }
+     public NavMeshAgent NavMeshAgent { get; private set; }
+     public CharacterController CharacterController { get; private set; }
      public Animator animator { get; private set; }
      public MeeleFighter Fighter { get; private set; }
+     public SkinnedMeshHighlighter MeshHighlighter { get; private set; }
+     public VisionSensor Visioner { get;  set; }
 
     private void Start()
     {
         animator = GetComponent<Animator>();
-        navMeshAgent = GetComponent<NavMeshAgent>();
+        NavMeshAgent = GetComponent<NavMeshAgent>();
+        CharacterController = GetComponent<CharacterController>();
         Fighter = GetComponent<MeeleFighter>();
+        MeshHighlighter = GetComponent<SkinnedMeshHighlighter>();
 
         stateDict = new Dictionary<EnemyState, State<EnemyController>>();
         stateDict[EnemyState.Idle] = GetComponent<IdleState>();
         stateDict[EnemyState.CombatMovement] = GetComponent<CombatMovementState>();
         stateDict[EnemyState.Attack] = GetComponent<AttackState>();
         stateDict[EnemyState.RetreatAfterAttack] = GetComponent<RetreatAfterAttackState>();
+        stateDict[EnemyState.Dead] = GetComponent<DeadState>();
 
         StateMachine = new StateMachine<EnemyController>(this);
 
@@ -58,7 +65,7 @@ public class EnemyController : MonoBehaviour
 
         float ForwardSpeed = Vector3.Dot(Velocity,transform.forward);
 
-        animator.SetFloat("ForwardSpeed", ForwardSpeed / navMeshAgent.speed,0.2f,Time.deltaTime);
+        animator.SetFloat("ForwardSpeed", ForwardSpeed / NavMeshAgent.speed,0.2f,Time.deltaTime);
         
         float angle = Vector3.SignedAngle(transform.forward, Velocity, Vector3.up);
         float StrafeSpeed = Mathf.Sin(angle * Mathf.Deg2Rad);

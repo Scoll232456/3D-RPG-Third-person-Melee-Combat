@@ -34,6 +34,10 @@ public class CameraController : MonoBehaviour
     private float currentDistance;             // 实际计算出的距离
     private float velocityDistance;            // 用于 SmoothDamp 的引用变量
 
+    // 切换视角相关参数
+    private bool SwitchPerspective = false;
+    public Vector3 FirstPersonPerspectiveOffset;
+
     private void Start()
     {
         Cursor.visible = false;
@@ -44,64 +48,86 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        // 通过鼠标滑动来操作相机的移动
-        InvertValueX = (InvertX) ? 1 :-1 ;
-        InvertValueY = (InvertY) ? 1 :-1 ;
-        // RotationX -= Input.GetAxis("Mouse Y") * RotationSpeed * InvertValueX;
-        RotationX -= Input.GetAxis("Camera Y") * RotationSpeed * InvertValueX;
-        RotationX = Mathf.Clamp(RotationX, MinRotationX, MaxRotationX);
-        
-        // RotationY += Input.GetAxis("Mouse X") * RotationSpeed * InvertValueY;
-        RotationY += Input.GetAxis("Camera X") * RotationSpeed * InvertValueY;
-
-        var TargetRotation = Quaternion.Euler(RotationX, RotationY, 0);
-        var FoucsPostion = TargetFollow.position + MainCameraOffect;
-
-        //Vector3 CameraPosInfluenceByMouse;
-        //if (RotationX < 0)
-        //{
-        //    var ApproximateDown = (RotationX - MinRotationX) / (4 * Mathf.Abs(MinRotationX));
-
-        //    CameraPosInfluenceByMouse = FoucsPostion -
-        //          TargetRotation * new Vector3(0, 0, Distance) * ApproximateDown + new Vector3(0, 0.8f, 0);
-        //}
-        //else
-        //{
-        //    CameraPosInfluenceByMouse = FoucsPostion -
-        //          TargetRotation * new Vector3(0, 0, Distance);
-        //}
-
-        // 先算出“理想”的相机位置（即没有障碍物时，只凭借玩家操作鼠标移动的相机的位置）
-        Vector3 desiredCameraPos = FoucsPostion -
-        TargetRotation * new Vector3(0, 0, Distance);
-
-        // ---- 防穿墙计算 ----
-        // 使用射线检测（或 SphereCast）检查从目标点到期望相机位置之间是否有障碍物
-        RaycastHit hit;
-        Vector3 direction = (desiredCameraPos - FoucsPostion).normalized;
-        float maxCheckDistance = Vector3.Distance(desiredCameraPos, FoucsPostion);
-
-        if (Physics.SphereCast(FoucsPostion, 
-            CollisionRadius, direction, 
-            out hit, maxCheckDistance, ObstacleMask))
+        if (Input.GetKeyDown(KeyCode.F)) { SwitchPerspective = !SwitchPerspective; }
+        if (SwitchPerspective) 
         {
-            // 如果碰到障碍物，将相机位置放在碰撞点稍微靠前的位置
-            Debug.Log("相机发出的球形射线碰到了"+ hit.transform.name);
-            float safeDistance = Mathf.Max(hit.distance - CollisionRadius, MinDistance);
-            currentDistance = Mathf.SmoothDamp(currentDistance, safeDistance, ref velocityDistance, SmoothTime);
+            // 通过鼠标滑动来操作相机的移动
+            InvertValueX = (InvertX) ? 1 : -1;
+            InvertValueY = (InvertY) ? 1 : -1;
+            // RotationX -= Input.GetAxis("Mouse Y") * RotationSpeed * InvertValueX;
+            RotationX -= Input.GetAxis("Camera Y") * RotationSpeed * InvertValueX;
+            RotationX = Mathf.Clamp(RotationX, MinRotationX, MaxRotationX);
+
+            // RotationY += Input.GetAxis("Mouse X") * RotationSpeed * InvertValueY;
+            RotationY += Input.GetAxis("Camera X") * RotationSpeed * InvertValueY;
+            
+            transform.position = TargetFollow.transform.position + FirstPersonPerspectiveOffset;
+            transform.rotation = Quaternion.Euler(RotationX, RotationY,0);
         }
-        else
+        else if (!SwitchPerspective) 
         {
-            // 没有障碍物，平滑恢复到理想距离
-            currentDistance = Mathf.SmoothDamp(currentDistance, Distance, ref velocityDistance, SmoothTime);
+            // 通过鼠标滑动来操作相机的移动
+            InvertValueX = (InvertX) ? 1 : -1;
+            InvertValueY = (InvertY) ? 1 : -1;
+            // RotationX -= Input.GetAxis("Mouse Y") * RotationSpeed * InvertValueX;
+            RotationX -= Input.GetAxis("Camera Y") * RotationSpeed * InvertValueX;
+            RotationX = Mathf.Clamp(RotationX, MinRotationX, MaxRotationX);
+
+            // RotationY += Input.GetAxis("Mouse X") * RotationSpeed * InvertValueY;
+            RotationY += Input.GetAxis("Camera X") * RotationSpeed * InvertValueY;
+
+            var TargetRotation = Quaternion.Euler(RotationX, RotationY, 0);
+            var FoucsPostion = TargetFollow.position + MainCameraOffect;
+
+            #region
+
+            //Vector3 CameraPosInfluenceByMouse;
+            //if (RotationX < 0)
+            //{
+            //    var ApproximateDown = (RotationX - MinRotationX) / (4 * Mathf.Abs(MinRotationX));
+
+            //    CameraPosInfluenceByMouse = FoucsPostion -
+            //          TargetRotation * new Vector3(0, 0, Distance) * ApproximateDown + new Vector3(0, 0.8f, 0);
+            //}
+            //else
+            //{
+            //    CameraPosInfluenceByMouse = FoucsPostion -
+            //          TargetRotation * new Vector3(0, 0, Distance);
+            //}
+            #endregion
+
+            // 先算出“理想”的相机位置（即没有障碍物时，只凭借玩家操作鼠标移动的相机的位置）
+            Vector3 desiredCameraPos = FoucsPostion -
+            TargetRotation * new Vector3(0, 0, Distance);
+
+            // ---- 防穿墙计算 ----
+            // 使用射线检测（或 SphereCast）检查从目标点到期望相机位置之间是否有障碍物
+            RaycastHit hit;
+            Vector3 direction = (desiredCameraPos - FoucsPostion).normalized;
+            float maxCheckDistance = Vector3.Distance(desiredCameraPos, FoucsPostion);
+
+            if (Physics.SphereCast(FoucsPostion,
+                CollisionRadius, direction,
+                out hit, maxCheckDistance, ObstacleMask))
+            {
+                // 如果碰到障碍物，将相机位置放在碰撞点稍微靠前的位置
+                Debug.Log("相机发出的球形射线碰到了" + hit.transform.name);
+                float safeDistance = Mathf.Max(hit.distance - CollisionRadius, MinDistance);
+                currentDistance = Mathf.SmoothDamp(currentDistance, safeDistance, ref velocityDistance, SmoothTime);
+            }
+            else
+            {
+                // 没有障碍物，平滑恢复到理想距离
+                currentDistance = Mathf.SmoothDamp(currentDistance, Distance, ref velocityDistance, SmoothTime);
+            }
+
+            // 根据计算出的当前距离重新计算相机位置
+            Vector3 finalCameraPos = FoucsPostion - TargetRotation * Vector3.forward * currentDistance;
+
+            // 相机最终所处的位置和旋转度
+            transform.position = finalCameraPos;
+            transform.rotation = TargetRotation;
         }
-
-        // 根据计算出的当前距离重新计算相机位置
-        Vector3 finalCameraPos = FoucsPostion - TargetRotation * Vector3.forward * currentDistance;
-
-        // 相机最终所处的位置和旋转度
-        transform.position = finalCameraPos;
-        transform.rotation = TargetRotation;
     }
 
 
