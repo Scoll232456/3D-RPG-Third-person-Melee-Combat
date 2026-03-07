@@ -35,6 +35,16 @@ public class CombatMovementState : State<EnemyController>
     }
     public override void Execute()
     {
+        if (enemy.Target == null)
+        {
+            enemy.Target = enemy.FindTarget();
+            if (enemy.Target == null)
+            {
+                enemy.ChangeState(EnemyState.Idle);
+                return;
+            }
+        }
+
         // 设置范围(a,b)，当玩家距离敌人a,b之间的时候开始追逐
         // 小于a说明距离很近了，准备发动攻击或者在一旁徘徊伺机而动
         // 大于b说明距离太远，脱离仇恨范围

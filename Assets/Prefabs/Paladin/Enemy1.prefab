@@ -1752,6 +1752,7 @@ GameObject:
   - component: {fileID: 3506423927804234922}
   - component: {fileID: 3121248196976983247}
   - component: {fileID: 8466362943555431005}
+  - component: {fileID: 5562200935214814430}
   m_Layer: 8
   m_Name: Enemy1
   m_TagString: Enemy
@@ -1836,6 +1837,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: cd190a88a661b1f4ab7cf435597e3696, type: 2}
   - {fileID: 11400000, guid: 50adba9cee79d9540b4b5b89038bfc3c, type: 2}
   WeaponLargeSword: {fileID: 7679370255938963012}
+  rotationSpeed: 500
 --- !u!114 &3506423927804234913
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1865,7 +1867,7 @@ MonoBehaviour:
   - {fileID: 577136857170426750}
   - {fileID: 6094272107174433723}
   originalMaterial: {fileID: 1106563633393636324, guid: f8e3712988d303a4381dbcd4443645a1, type: 3}
-  highlightedMaterial: {fileID: 2100000, guid: fa4a58707b34c984d897e53e600d62a7, type: 2}
+  highlightedMaterial: {fileID: 2100000, guid: f08712f01310b734daadf689799f50d3, type: 2}
 --- !u!195 &3506423927804234925
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1956,6 +1958,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aee44886256f07e4a80b68479777296d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5562200935214814430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5902441649114499707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 315c358c75d282a4796db3b5c3181894, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stunTime: 0.5
 --- !u!1 &5921606947656771872
 GameObject:
   m_ObjectHideFlags: 0

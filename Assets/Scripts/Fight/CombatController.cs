@@ -64,18 +64,18 @@ public class CombatController : MonoBehaviour
             else 
             {
                 var enemyToAttack = EnemyManager.i.GetCloseToPlayerEnemyDirection(PlayerController.i.InputDir);
-                Vector3? dirToAttack = null;
-                if (enemyToAttack != null) 
-                { dirToAttack = enemyToAttack.transform.position - transform.position; }
+                // Vector3? dirToAttack = null;
+                //if (enemyToAttack != null) 
+                //{ dirToAttack = enemyToAttack.transform.position - transform.position; }
 
-
-                meeleFighter.TryToAttack(PlayerController.i.InputDir);
+                
+                meeleFighter?.TryToAttack(enemyToAttack?.Fighter);
                 
                 CombatMode = true;
             }
         }
 
-        if (Input.GetButtonDown("LockOn"))
+        if (Input.GetButtonDown("LockOn") || JoyStickHelper.i.GetAxisDown("LockOnTrigger"))
         {
             CombatMode = !CombatMode;
         }

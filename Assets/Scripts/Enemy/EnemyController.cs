@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public enum EnemyState
 {
@@ -9,7 +10,8 @@ public enum EnemyState
     CombatMovement,
     Attack,
     RetreatAfterAttack,
-    Dead
+    Dead,
+    GettingHit
 }
 
 public class EnemyController : MonoBehaviour
@@ -47,11 +49,19 @@ public class EnemyController : MonoBehaviour
         stateDict[EnemyState.Attack] = GetComponent<AttackState>();
         stateDict[EnemyState.RetreatAfterAttack] = GetComponent<RetreatAfterAttackState>();
         stateDict[EnemyState.Dead] = GetComponent<DeadState>();
+        stateDict[EnemyState.GettingHit] = GetComponent<GettingHitState>();
 
         StateMachine = new StateMachine<EnemyController>(this);
 
          StateMachine.ChangeState(stateDict[EnemyState.Idle]);
+
+        Fighter.OnGotHit += ()=>ChangeState(EnemyState.GettingHit);
     }
+
+    //void ReationHit()
+    //{
+    //    ChangeState(EnemyState.GettingHit);
+    //}
 
     private Vector3 PrePos;
     private void Update()
@@ -73,6 +83,21 @@ public class EnemyController : MonoBehaviour
 
         PrePos = transform.position;
     }
+
+    public MeeleFighter FindTarget()
+    {
+        foreach (var target in TargetsInRange)
+        {
+            var vecToTarget = target.transform.position - transform.position;
+            float angle = Vector3.Angle(transform.forward, vecToTarget);
+            if (angle <= Fov/2)
+            {
+                return target;
+            }
+        }
+        return null;
+    }
+
     public void ChangeState(EnemyState state)
     {
         StateMachine.ChangeState(stateDict[state]);

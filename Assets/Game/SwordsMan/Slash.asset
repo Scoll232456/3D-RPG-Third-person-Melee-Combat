@@ -16,3 +16,6 @@ MonoBehaviour:
   <_AttackHitBox>k__BackingField: 4
   <ImpactStartTime>k__BackingField: 0.3
   <ImpactEndTime>k__BackingField: 0.65
+  <MoveToTarget>k__BackingField: 0
+  <DistanceFromTarget>k__BackingField: 1
+  <MaxMoveDistance>k__BackingField: 3

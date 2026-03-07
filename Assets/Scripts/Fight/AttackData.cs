@@ -19,4 +19,10 @@ public class AttackData : ScriptableObject
     [field:SerializeField]public AttackHitBox _AttackHitBox { private set; get; }
     [field: SerializeField] public float ImpactStartTime { private set; get; }
     [field: SerializeField] public float ImpactEndTime { private set; get; }
+
+
+    [field: Header("Move To Target")]
+    [field: SerializeField] public bool MoveToTarget { private set; get; }
+    [field: SerializeField] public float DistanceFromTarget { private set; get; } = 1f;
+    [field: SerializeField] public float MaxMoveDistance { private set; get; } = 3f;
 }

@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 29b049459ec08754f828c3524995e293, type: 3}
-  m_Name: OutwardSlash
+  m_Name: SpanSlash
   m_EditorClassIdentifier: 
-  <AnimName>k__BackingField: OutwardSlash
+  <AnimName>k__BackingField: SpanSlash
   <_AttackHitBox>k__BackingField: 4
-  <ImpactStartTime>k__BackingField: 0.24
-  <ImpactEndTime>k__BackingField: 0.6
-  <MoveToTarget>k__BackingField: 0
+  <ImpactStartTime>k__BackingField: 0.54
+  <ImpactEndTime>k__BackingField: 0.9
+  <MoveToTarget>k__BackingField: 1
   <DistanceFromTarget>k__BackingField: 1
   <MaxMoveDistance>k__BackingField: 3
