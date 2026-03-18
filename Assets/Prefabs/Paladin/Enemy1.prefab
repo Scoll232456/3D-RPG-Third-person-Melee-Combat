@@ -1833,9 +1833,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e1f38dbe3c1ec140b98de5690ec4701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Health>k__BackingField: 25
   attacks:
   - {fileID: 11400000, guid: cd190a88a661b1f4ab7cf435597e3696, type: 2}
   - {fileID: 11400000, guid: 50adba9cee79d9540b4b5b89038bfc3c, type: 2}
+  longRangeAttacks:
+  - {fileID: 11400000, guid: cd190a88a661b1f4ab7cf435597e3696, type: 2}
+  longRangeAttackThreshold: 1.5
   WeaponLargeSword: {fileID: 7679370255938963012}
   rotationSpeed: 500
 --- !u!114 &3506423927804234913
@@ -3139,7 +3143,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2246094109797311321, guid: 0bf66807553d86f4a987653b9c421316, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3576849478287774436, guid: 0bf66807553d86f4a987653b9c421316, type: 3}
       propertyPath: m_Pivot.x
@@ -3227,11 +3231,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4642043796621312017, guid: 0bf66807553d86f4a987653b9c421316, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4642043796621312017, guid: 0bf66807553d86f4a987653b9c421316, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0bf66807553d86f4a987653b9c421316, type: 3}

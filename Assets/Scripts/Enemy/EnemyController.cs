@@ -18,6 +18,7 @@ public class EnemyController : MonoBehaviour
 {
     // 敌人正面朝向所拥有的视野
     [field: SerializeField] public float Fov { get; private set; } = 180f;
+    [field: SerializeField] public float AlertNearByEnemiesRange { get; private set; } = 20f;
 
     // 存储进入视野范围内的目标，如：玩家、玩家友方
     public List<MeeleFighter> TargetsInRange { get; set; } = new List<MeeleFighter>();
@@ -55,7 +56,22 @@ public class EnemyController : MonoBehaviour
 
          StateMachine.ChangeState(stateDict[EnemyState.Idle]);
 
-        Fighter.OnGotHit += ()=>ChangeState(EnemyState.GettingHit);
+        Fighter.OnGotHit += (MeeleFighter attacker) => 
+        {
+            if (Fighter.Health > 0)
+            {
+                if (Target == null)
+                {
+                    Target = attacker;
+                    AlertNearbyEnemies();
+                }
+                ChangeState(EnemyState.GettingHit);
+            }
+            else
+            {
+                ChangeState(EnemyState.Dead);
+            }
+        };
     }
 
     //void ReationHit()
@@ -80,6 +96,12 @@ public class EnemyController : MonoBehaviour
         float angle = Vector3.SignedAngle(transform.forward, Velocity, Vector3.up);
         float StrafeSpeed = Mathf.Sin(angle * Mathf.Deg2Rad);
         animator.SetFloat("StrafeSpeed", StrafeSpeed, 0.2f, Time.deltaTime);
+
+        if (Target?.Health <= 0) 
+        {
+            TargetsInRange.Remove(Target);
+            EnemyManager.i.RemoveEnemyInRange(this);
+        }
 
         PrePos = transform.position;
     }
@@ -107,5 +129,27 @@ public class EnemyController : MonoBehaviour
     public bool IsInState(EnemyState state)
     {
        return StateMachine.CurrentState == stateDict[state];
+    }
+
+    public void AlertNearbyEnemies()
+    {
+       var colliders = Physics.OverlapBox(transform.position,
+            new Vector3(AlertNearByEnemiesRange/2, 1f, AlertNearByEnemiesRange/2),
+            Quaternion.identity,
+            EnemyManager.i.EnemyLayer);
+
+        foreach (var collider in colliders) 
+        {
+            if (collider.gameObject == gameObject)
+            {
+                continue;
+            }
+            var nearbyEnemy = collider.GetComponent<EnemyController>();
+            if(nearbyEnemy != null && nearbyEnemy.Target == null)
+            {
+                nearbyEnemy.Target = Target;
+                nearbyEnemy.ChangeState(EnemyState.CombatMovement);
+            }
+        }
     }
 }

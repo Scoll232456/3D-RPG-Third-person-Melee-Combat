@@ -39,12 +39,12 @@ public class AttackState : State<EnemyController>
         isAttacking = true;
         enemy.animator.applyRootMotion = true;
 
-        enemy.Fighter.TryToAttack();
+        enemy.Fighter.TryToAttack(enemy.Target);
 
-        for (int i = 1;i< comboCount; i++ )
+        for (int i = 1;i < comboCount; i++ )
         {
             yield return new WaitUntil(() => enemy.Fighter.AttackState == MeeleFighterAttackState.CoolDown);
-            enemy.Fighter.TryToAttack();
+            enemy.Fighter.TryToAttack(enemy.Target);
         }
 
         yield return new WaitUntil(()=>enemy.Fighter.AttackState == MeeleFighterAttackState.Idle);

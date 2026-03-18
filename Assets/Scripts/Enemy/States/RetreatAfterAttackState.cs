@@ -8,14 +8,16 @@ public class RetreatAfterAttackState : State<EnemyController>
     public float distanceToRetreat = 4f;
 
     EnemyController enemy;
+    Vector3 tartgetPos;
     public override void Enter(EnemyController owner)
     {
         enemy = owner;
+        tartgetPos = enemy.Target.transform.position;
     }
 
     public override void Execute()
     {
-        if (Vector3.Distance(enemy.transform.position ,enemy.Target.transform.position) >= distanceToRetreat) 
+        if (Vector3.Distance(enemy.transform.position , tartgetPos) >= distanceToRetreat) 
         {
             enemy.ChangeState(EnemyState.CombatMovement);
             return;

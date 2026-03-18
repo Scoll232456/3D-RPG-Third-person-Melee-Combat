@@ -46,7 +46,7 @@ public class PlayerController : MonoBehaviour
     }
     void Update()
     {
-        if (meeleFighter.InAction) 
+        if (meeleFighter.InAction || meeleFighter.Health <= 0f) 
         {
             TargetRotation = transform.rotation;
             _Animator.SetFloat("ForwardSpeed", 0);
@@ -128,6 +128,12 @@ public class PlayerController : MonoBehaviour
     void GroundCheck()
     {
         isGround = Physics.CheckSphere(transform.TransformPoint(groundCheckOffset), groundCheckRadius, groundLayer);
+    }
+
+    public Vector3 GetIntentDirection()
+    {
+        return InputDir !=
+                    Vector3.zero ? InputDir : transform.forward;
     }
 
     private void OnDrawGizmosSelected()

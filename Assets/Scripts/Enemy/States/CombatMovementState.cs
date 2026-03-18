@@ -35,14 +35,21 @@ public class CombatMovementState : State<EnemyController>
     }
     public override void Execute()
     {
-        if (enemy.Target == null)
+        //if (enemy.Target == null)
+        //{
+        //    enemy.Target = enemy.FindTarget();
+        //    if (enemy.Target == null)
+        //    {
+        //        enemy.ChangeState(EnemyState.Idle);
+        //        return;
+        //    }
+        //}
+
+        if (enemy.Target.Health <= 0) 
         {
-            enemy.Target = enemy.FindTarget();
-            if (enemy.Target == null)
-            {
-                enemy.ChangeState(EnemyState.Idle);
-                return;
-            }
+            enemy.Target = null;
+            enemy.ChangeState(EnemyState.Idle);
+            return;
         }
 
         // 设置范围(a,b)，当玩家距离敌人a,b之间的时候开始追逐

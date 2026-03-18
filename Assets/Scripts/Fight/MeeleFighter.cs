@@ -15,6 +15,8 @@ public enum MeeleFighterAttackState
 
 public class MeeleFighter : MonoBehaviour
 {
+    [field:SerializeField]public float Health { private set; get; } = 25f;
+
     public List<AttackData> attacks;
     public List<AttackData> longRangeAttacks;
     public float longRangeAttackThreshold = 1.5f;
@@ -24,7 +26,7 @@ public class MeeleFighter : MonoBehaviour
     SphereCollider leftHandCollider, rightHandCollider, leftFootCollider, rightFootCollider;
     public bool InAction { private set; get; } = false;
 
-    public event Action OnGotHit;
+    public event Action<MeeleFighter> OnGotHit;
     public event Action OnHitComplete;
 
     Animator animator;
@@ -36,6 +38,8 @@ public class MeeleFighter : MonoBehaviour
     // 连招，是否触发连招，连招数量
     private bool DoCombo;
     private int ComboCount = 0;
+
+    public bool IsTakingHit { private set; get; } = false;
 
     private void Awake()
     {
@@ -69,9 +73,13 @@ public class MeeleFighter : MonoBehaviour
         }
     }
 
+    MeeleFighter curTarget;
     IEnumerator Attack(MeeleFighter target = null)
     {
         InAction = true; // 避免反复触发攻击动作
+
+        curTarget = target; // 攻击只针对当前的单位
+
         AttackState = MeeleFighterAttackState.WindUp; // 攻击状态由初始状态进入抬手状态
 
         var attack = attacks[ComboCount];
@@ -88,7 +96,7 @@ public class MeeleFighter : MonoBehaviour
             float distance = vecTarget.magnitude;
 
            
-            if (distance > longRangeAttackThreshold) 
+            if (distance > longRangeAttackThreshold && longRangeAttacks.Count > 0) 
             {
                 attack = longRangeAttacks[0];
             }
@@ -118,13 +126,16 @@ public class MeeleFighter : MonoBehaviour
         float timer = 0f;
         while (timer <= AnimatorState.length)
         {
+            if (IsTakingHit) { break; }
+
             timer += Time.deltaTime;
             float AnimationProgressRatio = timer / AnimatorState.length;
 
             // 向目标移动并攻击
             if (target != null && attack.MoveToTarget) 
             {
-                transform.position = Vector3.Lerp(startPos,targetPos, AnimationProgressRatio);
+                float percTime = (AnimationProgressRatio - attack.MoveStartTime)/(attack.MoveEndTime - attack.MoveStartTime);
+                transform.position = Vector3.Lerp(startPos,targetPos, percTime);
             }
 
             if (attackDir != null) 
@@ -159,7 +170,7 @@ public class MeeleFighter : MonoBehaviour
                 {
                     DoCombo = false;
                     ComboCount = (ComboCount + 1) % attacks.Count;
-                    StartCoroutine(Attack());
+                    StartCoroutine(Attack(target));
                     yield break;
                 }
             }
@@ -170,16 +181,23 @@ public class MeeleFighter : MonoBehaviour
         yield return new WaitForSeconds(AnimatorState.length * 0.1f);
 
         InAction = false;
+        curTarget = null;
     }
-    IEnumerator PlayerHitReaction(Transform attacker)
+
+    private void TakeDamage(float damage)
+    {
+        Health = Mathf.Clamp(Health - damage, 0, Health);
+    }
+
+    IEnumerator PlayerHitReaction(MeeleFighter attacker)
     {
         InAction = true;
-
+        IsTakingHit = true;
         // 受到攻击的方向
         var Vect = attacker.transform.position - transform.position;
         Vect.y = 0;
 
-        OnGotHit?.Invoke();
+        OnGotHit?.Invoke(attacker);
 
         animator.CrossFadeInFixedTime("AttackImpact", 0.2f);
         yield return null;
@@ -191,6 +209,12 @@ public class MeeleFighter : MonoBehaviour
         OnHitComplete?.Invoke();
 
         InAction = false;
+        IsTakingHit = false;
+    }
+
+    private void PlayDeathAnimation(MeeleFighter attacker)
+    {
+        animator.CrossFade("FallingBackDeath", 0.2f);
     }
 
     public IEnumerator PreformCombatAttack(EnemyController opponent)
@@ -232,9 +256,22 @@ public class MeeleFighter : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "HitBox" && !InAction )// && this.tag == "Enemy"
+        if (other.tag == "HitBox" && !IsTakingHit && !InCounter )// && this.tag == "Enemy"
         {
-            StartCoroutine( PlayerHitReaction(other.GetComponentInParent<MeeleFighter>().transform) );
+            var attacker = other.GetComponentInParent<MeeleFighter>();
+            if (attacker.curTarget != this) { return; }
+
+            TakeDamage(5f);
+            OnGotHit?.Invoke(attacker);
+
+            if (Health > 0)
+            {
+                StartCoroutine(PlayerHitReaction(attacker));
+            }
+            else 
+            {
+                PlayDeathAnimation(attacker);
+            }
         }
     }
 

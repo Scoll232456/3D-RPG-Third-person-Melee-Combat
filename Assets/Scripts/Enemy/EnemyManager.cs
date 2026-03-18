@@ -8,6 +8,8 @@ public class EnemyManager : MonoBehaviour
     public Vector2 timeRangeBetweenAttacks = new Vector2(1,4);
     public CombatController player;
 
+    [field:SerializeField]public LayerMask EnemyLayer { get; private set; }
+
     private CameraController cam;
     private List<EnemyController> enemiesInRange = new List<EnemyController>();
     private float notAttackingTimer = 2f;

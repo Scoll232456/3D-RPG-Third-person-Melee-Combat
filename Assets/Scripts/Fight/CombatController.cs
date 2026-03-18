@@ -52,9 +52,21 @@ public class CombatController : MonoBehaviour
         cameraController = Camera.main.GetComponent<CameraController>();
 
     }
+
+    private void Start()
+    {
+        meeleFighter.OnGotHit += (MeeleFighter attacker) => 
+        {
+            if (CombatMode && attacker != TargetEnemy.Fighter) 
+            {
+                TargetEnemy = attacker.GetComponent<EnemyController>();
+            }
+        };
+    }
+
     private void Update()
     {
-        if (Input.GetButtonDown("CommanAttack")) 
+        if (Input.GetButtonDown("CommanAttack") && !meeleFighter.IsTakingHit) 
         {
             var enemy = EnemyManager.i.GetAttackingEnemy();
             if (enemy != null && enemy.Fighter.IsCounterable && !meeleFighter.InAction)
@@ -63,12 +75,12 @@ public class CombatController : MonoBehaviour
             }
             else 
             {
-                var enemyToAttack = EnemyManager.i.GetCloseToPlayerEnemyDirection(PlayerController.i.InputDir);
+                var enemyToAttack = EnemyManager.i.GetCloseToPlayerEnemyDirection(
+                    PlayerController.i.GetIntentDirection());
                 // Vector3? dirToAttack = null;
                 //if (enemyToAttack != null) 
                 //{ dirToAttack = enemyToAttack.transform.position - transform.position; }
 
-                
                 meeleFighter?.TryToAttack(enemyToAttack?.Fighter);
                 
                 CombatMode = true;
